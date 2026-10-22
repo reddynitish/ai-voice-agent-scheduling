@@ -3,6 +3,16 @@ name = "scheduling-agent"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "google-api-python-client>=2.201.0",
+    "google-auth-oauthlib>=1.5.0",
     "livekit-agents~=1.8",
     "python-dotenv>=1.2.4",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from livekit import agents
 from livekit.agents import Agent, AgentServer, AgentSession, RunContext, TurnHandlingOptions, function_tool, inference
+from livekit.agents.beta.tools import EndCallTool
 
 load_dotenv(".env.local")
 
@@ -27,7 +28,8 @@ How to handle a booking:
    If they give one, read it back once in plain letters without phonetic words, for example "r e d d y at gmail dot com".
 5. Once you have everything, confirm ONCE in a single sentence: name, purpose, day, date, and time, plus the email if given.
    Only call book_appointment after the caller says yes. Don't ask for confirmation again after that.
-6. After booking, confirm it's done, ask if there's anything else, then say goodbye.
+6. After booking, confirm it's done and ask if there's anything else.
+   When the caller says they're done, call end_call to say goodbye and hang up.
 
 If the caller changes any detail, update it and confirm again. Never make up availability or say something is booked unless book_appointment succeeded.
 Don't mention the time zone unless the caller asks.
@@ -111,6 +113,7 @@ class Scheduler(Agent):
                 open_h=now.replace(hour=cal.OPEN_HOUR, minute=0).strftime("%I %p").lstrip("0"),
                 close_h=now.replace(hour=cal.CLOSE_HOUR, minute=0).strftime("%I %p").lstrip("0"),
             ),
+            tools=[EndCallTool(end_instructions="Say a brief, warm goodbye.")],
         )
 
     @function_tool

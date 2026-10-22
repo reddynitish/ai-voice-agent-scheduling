@@ -1,0 +1,10 @@
+.env
+.env.local
+credentials.json
+token.json
+__pycache__/
+.venv/
+node_modules/
+.next/
+.DS_Store
+PLAN.md

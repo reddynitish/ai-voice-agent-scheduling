@@ -21,12 +21,36 @@ const LIVEKIT_URL = process.env.LIVEKIT_URL;
 // don't cache the results
 export const revalidate = 0;
 
+// This route is public on the demo site, so cap how many calls can start. Each call
+// uses paid inference credits. The page also prefetches a token, so limits count requests,
+// not calls. In-memory limits are fine for a single-instance server.
+const CALLS_PER_IP_PER_HOUR = Number(process.env.CALLS_PER_IP_PER_HOUR ?? 10);
+const CALLS_PER_DAY = Number(process.env.CALLS_PER_DAY ?? 40);
+const HOUR_MS = 60 * 60 * 1000;
+const callsByIp = new Map<string, number[]>();
+const callsToday: number[] = [];
+
+function allowCall(ip: string): boolean {
+  const now = Date.now();
+  const recent = (callsByIp.get(ip) ?? []).filter((t) => now - t < HOUR_MS);
+  while (callsToday.length && now - callsToday[0] >= 24 * HOUR_MS) callsToday.shift();
+  if (recent.length >= CALLS_PER_IP_PER_HOUR || callsToday.length >= CALLS_PER_DAY) {
+    callsByIp.set(ip, recent);
+    return false;
+  }
+  recent.push(now);
+  callsToday.push(now);
+  callsByIp.set(ip, recent);
+  return true;
+}
+
 export async function POST(req: Request) {
-  // make an exception for the vercel preview environment
-  if (process.env.NODE_ENV !== 'development' && process.env.IS_VERCEL_PREVIEW !== 'true') {
-    throw new Error(
-      'THIS API ROUTE IS INSECURE. DO NOT USE THIS ROUTE IN PRODUCTION WITHOUT AN AUTHENTICATION LAYER.'
-    );
+  const ip =
+    req.headers.get('cf-connecting-ip') ??
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    'local';
+  if (!allowCall(ip)) {
+    return new NextResponse('Demo call limit reached. Please try again later.', { status: 429 });
   }
 
   try {

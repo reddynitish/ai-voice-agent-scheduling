@@ -15,7 +15,7 @@ export default function Page() {
       tokenServerId={tokenServerId}
       tokenEndpoint={tokenEndpoint}
       agentName={process.env.AGENT_NAME}
-      isVideoInputSupported={!isHomepageAgent}
+      isVideoInputSupported={false}
     />
   );
 }

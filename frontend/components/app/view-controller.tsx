@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useAgent, useSessionContext } from '@livekit/components-react';
 import { AgentSessionView_01 } from '@/components/agents-ui/blocks/agent-session-view-01';
 import { WelcomeView } from '@/components/app/welcome-view';
+import { toastAlert } from '@/hooks/useAgentErrors';
 
 const MotionWelcomeView = motion.create(WelcomeView);
 const MotionSessionView = motion.create(AgentSessionView_01);
@@ -44,7 +45,14 @@ export function ViewController({ isVideoInputSupported }: ViewControllerProps) {
           key="welcome"
           {...VIEW_MOTION_PROPS}
           startButtonText="Talk to Ava"
-          onStartCall={start}
+          onStartCall={() =>
+            start().catch((error: unknown) =>
+              toastAlert({
+                title: 'Could not start the call',
+                description: error instanceof Error ? error.message : String(error),
+              })
+            )
+          }
         />
       )}
       {/* Session view */}

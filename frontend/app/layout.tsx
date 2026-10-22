@@ -54,7 +54,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
     >
       <head>
         <title>Ava · Voice Scheduling Agent</title>
-        <meta name="description" content="Book appointments by voice. Ava checks availability and creates Google Calendar events." />
+        <meta
+          name="description"
+          content="Book appointments by voice. Ava checks availability and creates Google Calendar events."
+        />
       </head>
       <body className="overflow-x-hidden">
         <ThemeProvider

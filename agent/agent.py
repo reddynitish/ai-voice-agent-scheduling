@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from datetime import date, datetime, timedelta
 
 from dotenv import load_dotenv
@@ -13,6 +14,14 @@ load_dotenv(".env.local")
 import calendar_client as cal  # noqa: E402  (reads TIMEZONE/CALENDAR_ID from env)
 
 logger = logging.getLogger("scheduler")
+
+# Defaults favor low latency. For free dev testing set TTS_MODEL=fishaudio/s2.1-pro-free
+# and TTS_VOICE=fa4c9eb3dccc4806b382b40d61c6b10a (about 1 s slower to start speaking).
+STT_MODEL = os.getenv("STT_MODEL", "assemblyai/universal-streaming")
+LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-4.1-mini")
+TTS_MODEL = os.getenv("TTS_MODEL", "cartesia/sonic-3")
+TTS_VOICE = os.getenv("TTS_VOICE", "9626c31c-bec5-4cca-baa8-f8ba9e84c8bc")
+MAX_CALL_SECONDS = int(os.getenv("MAX_CALL_SECONDS", "300"))
 
 INSTRUCTIONS = """You are Ava, a friendly voice receptionist who books appointments on one calendar.
 Today is {today}. The current time is {now}. All times are in the {tz} time zone.
@@ -160,16 +169,32 @@ class Scheduler(Agent):
 server = AgentServer()
 
 
+async def _end_after_time_limit(ctx: agents.JobContext, session: AgentSession) -> None:
+    """Cap call length so a public demo link can't drain inference credits."""
+    await asyncio.sleep(MAX_CALL_SECONDS)
+    await session.generate_reply(
+        instructions="Tell the caller the demo call time limit has been reached, then say goodbye.",
+        allow_interruptions=False,
+    )
+    await ctx.delete_room()
+
+
 @server.rtc_session(agent_name="scheduler")
 async def entrypoint(ctx: agents.JobContext):
     session = AgentSession(
-        stt=inference.STT(model="deepgram/nova-3", language="en"),
-        llm=inference.LLM(model="openai/gpt-4.1-mini"),
-        tts=inference.TTS(model="cartesia/sonic-3", voice="9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"),
+        stt=inference.STT(model=STT_MODEL, language="en"),
+        llm=inference.LLM(model=LLM_MODEL),
+        tts=inference.TTS(model=TTS_MODEL, voice=TTS_VOICE),
         vad=inference.VAD(),
         turn_handling=TurnHandlingOptions(turn_detection=inference.TurnDetector()),
     )
     await session.start(room=ctx.room, agent=Scheduler())
+    timer = asyncio.create_task(_end_after_time_limit(ctx, session))
+
+    async def _cancel_timer() -> None:
+        timer.cancel()
+
+    ctx.add_shutdown_callback(_cancel_timer)
     await session.generate_reply(instructions="Greet the caller as Ava and ask how you can help.")
 
 

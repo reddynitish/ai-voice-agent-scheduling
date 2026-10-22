@@ -1,0 +1,7 @@
+.venv
+.env*
+!.env.example
+token.json
+credentials.json
+tests
+__pycache__

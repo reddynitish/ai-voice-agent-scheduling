@@ -3,6 +3,7 @@
 Run `uv run python calendar_client.py` once to sign in; it saves token.json.
 """
 
+import json
 import os
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
@@ -24,7 +25,19 @@ OPEN_HOUR, CLOSE_HOUR = 9, 17  # business hours, Mon-Fri
 SLOT_STEP = timedelta(minutes=30)
 
 
+_cached: Credentials | None = None
+
+
 def _credentials() -> Credentials:
+    global _cached
+    if _cached and _cached.valid:
+        return _cached
+    # In the cloud the token comes from a secret; refreshes stay in memory.
+    if token_json := os.getenv("GOOGLE_TOKEN_JSON"):
+        _cached = _cached or Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+        _cached.refresh(Request())
+        return _cached
+
     creds = None
     if TOKEN_FILE.exists():
         creds = Credentials.from_authorized_user_file(str(TOKEN_FILE), SCOPES)
@@ -36,6 +49,7 @@ def _credentials() -> Credentials:
         flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_FILE), SCOPES)
         creds = flow.run_local_server(port=0)
     TOKEN_FILE.write_text(creds.to_json())
+    _cached = creds
     return creds
 
 

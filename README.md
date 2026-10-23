@@ -153,4 +153,4 @@ Web UI: `CALLS_PER_IP_PER_HOUR` (default 10) and `CALLS_PER_DAY` (default 40).
 - **One calendar.** Ava acts as the receptionist for a single calendar, such as a business or a provider. Callers are invited by email instead of having their own calendars modified.
 - **Fixed business hours and 30-minute slots.** Both are constants in `calendar_client.py`.
 - **No cancellation or rescheduling yet.** These would be the next tools to add, using the same pattern.
-- **OAuth app in testing mode.** Google expires refresh tokens after 7 days for unpublished apps. Publishing the OAuth app removes the limit.
+- **OAuth app in testing mode.** Google expires refresh tokens after 7 days for unpublished apps. `agent/scripts/refresh_google_token.sh` signs in again and updates the deployed agent in one step. Publishing the OAuth app removes the limit. If the token does lapse, Ava tells callers the calendar is unavailable instead of failing mid-call.

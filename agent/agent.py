@@ -136,7 +136,11 @@ class Scheduler(Agent):
             time: Start time in 24-hour HH:MM format. Omit to list open times that day.
             duration_minutes: Appointment length in minutes.
         """
-        return await asyncio.to_thread(_check, date, time, duration_minutes)
+        try:
+            return await asyncio.to_thread(_check, date, time, duration_minutes)
+        except Exception:
+            logger.exception("availability check failed")
+            return "The calendar is unavailable right now. Apologize and suggest calling back later."
 
     @function_tool
     async def book_appointment(

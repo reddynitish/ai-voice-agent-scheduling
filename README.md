@@ -15,14 +15,14 @@ Built on [LiveKit Agents](https://docs.livekit.io/agents) for real-time audio an
 
 A typical call:
 
-> **Ava:** Hi, this is Ava. How can I help?
-> **Caller:** I need a dental checkup tomorrow at 10.
-> **Ava:** 10 AM tomorrow is taken. I have 9 AM, 9:30, or 10:30. Would any of those work?
-> **Caller:** 10:30 works. I'm Sam.
-> **Ava:** Would you like a calendar invite by email?
-> **Caller:** No thanks.
-> **Ava:** So that's a dental checkup for Sam on Friday, October 23rd at 10:30 AM. Shall I book it?
-> **Caller:** Yes.
+> **Ava:** Hi, this is Ava. How can I help?\
+> **Caller:** I need a dental checkup tomorrow at 10.\
+> **Ava:** 10 AM tomorrow is taken. I have 9 AM, 9:30, or 10:30. Would any of those work?\
+> **Caller:** 10:30 works. I'm Sam.\
+> **Ava:** Would you like a calendar invite by email?\
+> **Caller:** No thanks.\
+> **Ava:** So that's a dental checkup for Sam on Friday, October 23rd at 10:30 AM. Shall I book it?\
+> **Caller:** Yes.\
 > **Ava:** You're all set. Anything else? … Have a great day!
 
 ## Architecture

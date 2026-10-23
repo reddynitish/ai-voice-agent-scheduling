@@ -61,7 +61,9 @@ export function ViewController({ isVideoInputSupported }: ViewControllerProps) {
           key="session-view"
           {...VIEW_MOTION_PROPS}
           preConnectMessage={
-            agent.isConnected ? 'Agent is listening, ask it a question' : 'Waiting for agent'
+            agent.isConnected
+              ? 'Ava is listening'
+              : 'Connecting to Ava. The first call can take up to a minute while she wakes up.'
           }
           supportsChatInput={true}
           supportsVideoInput={isVideoInputSupported}

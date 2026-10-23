@@ -36,7 +36,12 @@ export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSuppo
     [tokenServerId, tokenEndpoint]
   );
 
-  const session = useSession(tokenSource, agentName ? { agentName } : undefined);
+  // The hosted agent scales to zero when idle; a cold start can take well over the
+  // default 20 s, so wait longer before declaring that the agent didn't join.
+  const session = useSession(tokenSource, {
+    ...(agentName ? { agentName } : {}),
+    agentConnectTimeoutMilliseconds: 90_000,
+  });
 
   return (
     <AgentSessionProvider session={session}>

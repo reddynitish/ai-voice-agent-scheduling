@@ -55,7 +55,7 @@ async def test_books_only_after_confirmation(fake_calendar):
         await session.start(agent.Scheduler())
 
         result = await session.run(
-            user_input="Hi, I'd like to book a haircut next Tuesday at 2 PM. My name is Nitish, "
+            user_input=f"Hi, I'd like to book a haircut on {tuesday:%A, %B} {tuesday.day} at 2 PM. My name is Nitish, "
             "N I T I S H. No email invite needed."
         )
         result.expect.contains_function_call(name="check_availability")
@@ -66,6 +66,10 @@ async def test_books_only_after_confirmation(fake_calendar):
 
         result = await session.run(user_input="Yes, that's right.")
         result.expect.contains_function_call(name="book_appointment")
+
+        summary = await agent.summarize_call(llm, agent._transcript(session))
+        assert summary.startswith("Request:"), summary
+        assert "Outcome: Booked" in summary and "Nitish" in summary, summary
 
     assert len(fake_calendar["created"]) == 1
     event = fake_calendar["created"][0]
@@ -80,7 +84,7 @@ async def test_offers_alternatives_when_slot_is_taken(fake_calendar):
 
     async with inference.LLM(model=agent.LLM_MODEL) as llm, AgentSession(llm=llm) as session:
         await session.start(agent.Scheduler())
-        result = await session.run(user_input="Can I get a dental checkup next Wednesday at 10 AM?")
+        result = await session.run(user_input=f"Can I get a dental checkup on {wednesday:%A, %B} {wednesday.day} at 10 AM?")
 
         result.expect.contains_function_call(name="check_availability")
         assert not booked(result)

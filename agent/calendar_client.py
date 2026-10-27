@@ -140,6 +140,14 @@ def create_event(
     )
 
 
+def add_call_summary(event_id: str, summary: str) -> None:
+    """Append the post-call summary to an event's description."""
+    events = _service().events()
+    current = events.get(calendarId=CALENDAR_ID, eventId=event_id).execute().get("description", "")
+    body = {"description": f"{current}\n\nCall summary\n{summary}".strip()}
+    events.patch(calendarId=CALENDAR_ID, eventId=event_id, body=body).execute()
+
+
 if __name__ == "__main__":
     _credentials()
     now = datetime.now(TZ)

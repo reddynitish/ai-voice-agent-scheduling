@@ -12,6 +12,7 @@ Built on [LiveKit Agents](https://docs.livekit.io/agents) for real-time audio an
 - **Manages the conversation:** asks one question at a time for anything missing (purpose, day, time, name). It honors spelled-out names, handles corrections, and confirms everything once before booking.
 - **Checks real availability:** reads the calendar's busy times. It rejects times in the past or outside business hours (Mon–Fri, 9 AM–5 PM) and offers the nearest open slots.
 - **Creates the event:** writes it to Google Calendar, optionally invites the caller by email, then says goodbye and hangs up.
+- **Summarizes the call:** when the call ends, an LLM writes a short summary (request, outcome, details, follow-up, call length). It is appended to the booked event's description, so whoever opens the appointment sees what was said, and it is logged for calls that didn't book.
 
 A typical call:
 
